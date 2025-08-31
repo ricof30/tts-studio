@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://tts-studio-eight.vercel.app/">Live Demo</a> ·
+  <a href="https://tts-studio-eight.vercel.app/">Live Demo</a> 
 </p>
 
 ---
