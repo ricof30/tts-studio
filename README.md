@@ -13,8 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://your-project.vercel.app/">Live Demo</a> ·
-  <a href="https://your-project.vercel.app/#api">API Mode</a>
+  <a href="https://tts-studio-eight.vercel.app/">Live Demo</a> ·
 </p>
 
 ---
