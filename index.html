@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TTS Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://js.puter.com/v2/"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-2: #0e1429;
+      --card: rgba(255,255,255,0.06);
+      --card-2: rgba(255,255,255,0.10);
+      --text: #e9edf7;
+      --muted: #a6b1d6;
+      --brand-1: #7c5cff;
+      --brand-2: #22d3ee;
+      --success: #2dd4bf;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+      --radius-xl: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(124,92,255,.25), transparent 60%),
+                  radial-gradient(1000px 900px at 110% 10%, rgba(34,211,238,.18), transparent 50%),
+                  linear-gradient(180deg, var(--bg), var(--bg-2));
+      background-attachment: fixed;
+    }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 28px; }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-bottom: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .badge {
+      font-size: 12px; padding: 6px 10px; border-radius: 999px; letter-spacing: .02em;
+      background: linear-gradient(90deg, rgba(124,92,255,.25), rgba(34,211,238,.25));
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--text);
+    }
+
+    h1.title {
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: .2px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo {
+      width: 38px; height: 38px; border-radius: 12px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(124,92,255,.9), rgba(34,211,238,.9));
+      box-shadow: var(--shadow);
+    }
+    .logo svg { filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .grid {
+      display: grid; gap: 18px; grid-template-columns: 1.15fr .85fr;
+    }
+    @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+    .editor { padding: 18px; }
+    .controls { padding: 16px; display: grid; gap: 14px; }
+
+    textarea#text {
+      width: 100%; min-height: 180px; resize: vertical; border: none;
+      padding: 18px; font: 500 16px/1.6 "Plus Jakarta Sans", sans-serif;
+      color: var(--text);
+      background: rgba(15,20,40,.6);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      outline: none;
+      transition: border .2s ease;
+    }
+    textarea#text:focus { border-color: rgba(124,92,255,.6); }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+
+    label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block; }
+    select, input[type="text"], input[type="search"] {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
+      background: rgba(18,24,48,.55); color: var(--text);
+      outline: none; transition: border .2s ease;
+    }
+    select:focus, input:focus { border-color: rgba(124,92,255,.7); }
+
+    .segmented {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .segmented button {
+      padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
+      background: rgba(19,26,52,.6); color: var(--muted); font-weight: 600;
+      letter-spacing: .02em; cursor: pointer; transition: all .2s ease;
+    }
+    .segmented button.active { color: var(--text); background: linear-gradient(180deg, rgba(124,92,255,.35), rgba(34,211,238,.25)); }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .btn {
+      appearance: none; border: none; cursor: pointer; padding: 12px 16px; border-radius: 12px;
+      font-weight: 700; letter-spacing: .03em; transition: transform .05s ease, filter .2s ease, background .2s ease;
+      display: inline-flex; align-items: center; gap: 8px; color: #0b1020;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: linear-gradient(135deg, var(--brand-1), var(--brand-2)); color: #0b1020; }
+    .btn.secondary { background: rgba(255,255,255,.85); color: #0b1020; }
+    .btn.ghost { background: rgba(255,255,255,.12); color: var(--text); border: 1px solid rgba(255,255,255,.12); }
+    .btn.warn { background: rgba(245,158,11,.2); color: #fbbf24; border: 1px solid rgba(245,158,11,.6); }
+    .btn.danger { background: rgba(239,68,68,.18); color: #fca5a5; border: 1px solid rgba(239,68,68,.6); }
+
+    .meta { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; margin-top: 10px; }
+    .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--muted); opacity: .7; }
+
+    .player { padding: 18px; display: grid; gap: 10px; }
+    .player audio { width: 100%; }
+
+    .history { padding: 16px; }
+    .history h3 { margin: 0 0 8px 0; font-size: 14px; color: var(--muted); font-weight: 600; }
+    .items { display: grid; gap: 10px; max-height: 340px; overflow: auto; }
+    .item { display: grid; gap: 8px; padding: 12px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+    .item .top { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+    .item .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { font-size: 11px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); color: var(--muted); }
+
+    .footer { margin-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+    .footer a { color: var(--text); opacity: .9; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2c2.9 0 5.5 1.2 7.4 3.1l-2.1 2.1A8 8 0 1 0 20 12h3a11 11 0 1 1-11-10Z" fill="white"/>
+            <path d="M14.5 7h2v10h-2V7Zm-7 3h2v7h-2v-7Z" fill="white" opacity=".9"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="title">Puter.js TTS Studio</h1>
+          <div class="badge">No API keys • Free • Browser‑based</div>
+        </div>
+      </div>
+      <div class="badge" id="status-badge" title="Status">Ready</div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Editor -->
+      <section class="card editor">
+        <label for="text">Your text</label>
+        <textarea id="text" placeholder="Type or paste up to 3000 characters…">Hello there! This beautiful interface is powered by Puter.js — click Synthesize to hear me.</textarea>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="language">Language</label>
+            <select id="language">
+              <option value="en-US" selected>English (US) — en‑US</option>
+              <option value="en-GB">English (UK) — en‑GB</option>
+              <option value="fr-FR">French — fr‑FR</option>
+              <option value="de-DE">German — de‑DE</option>
+              <option value="es-ES">Spanish — es‑ES</option>
+              <option value="it-IT">Italian — it‑IT</option>
+              <option value="nl-NL">Dutch — nl‑NL</option>
+              <option value="pt-BR">Portuguese (BR) — pt‑BR</option>
+              <option value="ja-JP">Japanese — ja‑JP</option>
+              <option value="ko-KR">Korean — ko‑KR</option>
+              <option value="zh-CN">Chinese (Simplified) — zh‑CN</option>
+            </select>
+          </div>
+          <div>
+            <label for="voice">Voice (optional)</label>
+            <input id="voice" type="search" list="voice-list" placeholder="e.g. Joanna, Matthew, Amy…" />
+            <datalist id="voice-list">
+              <option>Joanna</option>
+              <option>Matthew</option>
+              <option>Amy</option>
+              <option>Brian</option>
+              <option>Emma</option>
+              <option>Justin</option>
+              <option>Kendra</option>
+              <option>Kimberly</option>
+              <option>Salli</option>
+              <option>Joey</option>
+            </datalist>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label>Engine</label>
+          <div class="segmented" role="tablist" aria-label="Engine selector">
+            <button class="active" data-engine="standard" aria-selected="true">Standard</button>
+            <button data-engine="neural" aria-selected="false">Neural</button>
+            <button data-engine="generative" aria-selected="false">Generative</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="btn-synth">
+            <span>🔊</span>
+            <span>Synthesize</span>
+          </button>
+          <button class="btn ghost" id="btn-stop" title="Stop playback">
+            ⏹ Stop
+          </button>
+          <button class="btn secondary" id="btn-download" disabled>
+            ⬇️ Download
+          </button>
+          <button class="btn ghost" id="btn-share" title="Copy a shareable link">
+            🔗 Share Link
+          </button>
+          <button class="btn warn" id="btn-clear" title="Clear text">
+            🧹 Clear
+          </button>
+        </div>
+
+        <div class="meta">
+          <span id="char-count">0 / 3000</span>
+          <span class="dot"></span>
+          <span id="last-run">No synthesis yet</span>
+        </div>
+      </section>
+
+      <!-- Right: Player + History -->
+      <aside class="card">
+        <div class="player">
+          <label>Preview</label>
+          <audio id="audio" controls preload="metadata"></audio>
+          <div class="meta">
+            <span id="audio-meta">—</span>
+          </div>
+        </div>
+        <div class="history">
+          <h3>History (saved locally)</h3>
+          <div class="items" id="history"></div>
+        </div>
+      </aside>
+    </div>
+
+    <p class="footer">Built with Puter.js by <strong>Rico Fontecilla</strong>. No API keys or sign‑ups. This app also exposes a zero‑backend <em>iframe Messaging API</em> — open the documentation below.
+      <br/>Tip: add <code>#api</code> to the URL to enable programmatic control from a parent page.</p>
+  </div>
+
+  <script>
+    // ===== Utilities =====
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+
+    const state = {
+      engine: 'standard',
+      speaking: false,
+      currentAudio: null,
+      lastBlob: null,
+    };
+
+    const textEl = $('#text');
+    const langEl = $('#language');
+    const voiceEl = $('#voice');
+    const audioEl = $('#audio');
+    const charEl = $('#char-count');
+    const lastRunEl = $('#last-run');
+    const audioMetaEl = $('#audio-meta');
+    const statusBadge = $('#status-badge');
+
+    // Character count
+    const MAX_CHARS = 3000;
+    function updateCharCount(){
+      const len = (textEl.value || '').length;
+      charEl.textContent = `${len} / ${MAX_CHARS}`;
+      charEl.style.color = len > MAX_CHARS ? 'var(--danger)' : 'var(--muted)';
+    }
+    textEl.addEventListener('input', updateCharCount);
+    updateCharCount();
+
+    // Engine selector
+    const engineButtons = $$('.segmented button');
+    engineButtons.forEach(btn => btn.addEventListener('click', () => {
+      engineButtons.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected','true');
+      state.engine = btn.dataset.engine;
+    }));
+
+    // Buttons
+    const btnSynth = $('#btn-synth');
+    const btnStop = $('#btn-stop');
+    const btnDownload = $('#btn-download');
+    const btnShare = $('#btn-share');
+    const btnClear = $('#btn-clear');
+
+    btnClear.addEventListener('click', () => {
+      textEl.value = '';
+      updateCharCount();
+      textEl.focus();
+    });
+
+    btnStop.addEventListener('click', () => {
+      if (state.currentAudio) {
+        state.currentAudio.pause();
+        state.currentAudio.currentTime = 0;
+        state.speaking = false;
+        setStatus('Ready');
+      }
+    });
+
+    btnShare.addEventListener('click', async () => {
+      const params = new URLSearchParams({
+        text: textEl.value,
+        lang: langEl.value,
+        engine: state.engine,
+        voice: voiceEl.value || ''
+      });
+      const url = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
+      await navigator.clipboard.writeText(url);
+      toast('Shareable link copied to clipboard');
+    });
+
+    btnDownload.addEventListener('click', async () => {
+      if (!state.currentAudio) return;
+      try {
+        const blob = await fetch(state.currentAudio.src).then(r => r.blob());
+        const name = `tts-${new Date().toISOString().replace(/[:.]/g,'-')}.mp3`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+      } catch (e) {
+        console.error(e);
+        toast('Could not download audio');
+      }
+    });
+
+    function setStatus(text) { statusBadge.textContent = text; }
+    function toast(text){
+      statusBadge.textContent = text;
+      statusBadge.style.background = 'linear-gradient(90deg, rgba(34,211,238,.25), rgba(124,92,255,.25))';
+      setTimeout(() => { statusBadge.textContent = 'Ready'; statusBadge.style.background = '' }, 1400);
+    }
+
+    // History (localStorage)
+    const HISTORY_KEY = 'puter-tts-history-v1';
+    function loadHistory(){
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
+    }
+    function saveHistory(list){ localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 20))); }
+
+    async function addToHistory(entry){
+      const list = loadHistory();
+      list.unshift(entry);
+      saveHistory(list);
+      renderHistory();
+    }
+
+    function renderHistory(){
+      const list = loadHistory();
+      const box = $('#history');
+      box.innerHTML = '';
+      list.forEach((h, i) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <div class="top">
+            <div class="badges">
+              <span class="chip">${h.engine}</span>
+              <span class="chip">${h.language}</span>
+              ${h.voice ? `<span class="chip">${h.voice}</span>` : ''}
+              <span class="chip">${new Date(h.ts).toLocaleString()}</span>
+              ${h.size ? `<span class="chip">${(h.size/1024).toFixed(0)} KB</span>` : ''}
+            </div>
+            <div>
+              <button class="btn ghost" data-i="${i}" data-act="play">▶️</button>
+              <button class="btn ghost" data-i="${i}" data-act="download">⬇️</button>
+            </div>
+          </div>
+          <div style="color: var(--muted); font-size: 13px; line-height: 1.4;">${escapeHtml(h.text).slice(0, 160)}${h.text.length>160?'…':''}</div>
+        `;
+        box.appendChild(div);
+      });
+
+      box.querySelectorAll('button').forEach(btn => btn.addEventListener('click', (e) => {
+        const i = +btn.dataset.i; const act = btn.dataset.act; const h = loadHistory()[i];
+        if (!h) return;
+        if (act === 'play') {
+          audioEl.src = h.dataUrl; audioEl.play();
+        } else if (act === 'download') {
+          const a = document.createElement('a'); a.href = h.dataUrl; a.download = `tts-${new Date(h.ts).toISOString().replace(/[:.]/g,'-')}.mp3`; a.click();
+        }
+      }));
+    }
+
+    function escapeHtml(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+    renderHistory();
+
+    // Try to autofill from URL params
+    (function initFromQuery(){
+      const p = new URLSearchParams(location.search);
+      if (p.has('text')) textEl.value = p.get('text');
+      if (p.has('lang')) langEl.value = p.get('lang');
+      if (p.has('engine')) {
+        const btn = engineButtons.find(b => b.dataset.engine === p.get('engine'));
+        if (btn) btn.click();
+      }
+      if (p.has('voice')) voiceEl.value = p.get('voice');
+      updateCharCount();
+    })();
+
+    // Main synth action
+    btnSynth.addEventListener('click', synthesizeNow);
+
+    async function synthesizeNow(customText){
+      const text = (typeof customText === 'string' ? customText : textEl.value).trim();
+      if (!text) { toast('Enter some text first'); return; }
+      if (text.length > MAX_CHARS) { toast('Text is over the 3000 character limit'); return; }
+
+      const options = {
+        engine: state.engine,
+        language: langEl.value,
+      };
+      if (voiceEl.value) options.voice = voiceEl.value.trim();
+
+      btnSynth.disabled = true; setStatus(`Converting with ${state.engine}…`);
+      try {
+        const audio = await puter.ai.txt2speech(text, options);
+        state.currentAudio = audio;
+        audioEl.src = audio.src; // For preview
+        await audioEl.play();
+        setStatus('Playing');
+
+        // Prepare blob + meta for history & download button
+        const blob = await fetch(audio.src).then(r => r.blob()).catch(()=>null);
+        if (blob) {
+          state.lastBlob = blob;
+          btnDownload.disabled = false;
+          audioMetaEl.textContent = `${(blob.size/1024).toFixed(0)} KB • ${options.engine} • ${options.language}${options.voice? ' • '+options.voice:''}`;
+
+          const dataUrl = await blobToDataUrl(blob);
+          await addToHistory({ text, engine: options.engine, language: options.language, voice: options.voice||'', ts: Date.now(), size: blob.size, dataUrl });
+        } else {
+          audioMetaEl.textContent = `${options.engine} • ${options.language}${options.voice? ' • '+options.voice:''}`;
+        }
+
+        lastRunEl.textContent = `Last run: ${new Date().toLocaleString()}`;
+        setStatus('Ready');
+      } catch (err) {
+        console.error(err);
+        setStatus('Error');
+        toast(err?.message || 'Something went wrong');
+      } finally {
+        btnSynth.disabled = false;
+      }
+    }
+
+    function blobToDataUrl(blob){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    // ======= Iframe Messaging API (zero-backend) =======
+    // Enable by opening the app with #api in URL. Parent can postMessage requests and receive responses.
+    const API_ENABLED = location.hash.includes('api');
+
+    if (API_ENABLED) {
+      // Announce readiness to parent
+      try { parent && parent.postMessage({ type: 'PUTER_TTS_READY', app: 'puter-tts-studio', version: '1.0.0' }, '*'); } catch {}
+
+      window.addEventListener('message', async (event) => {
+        const msg = event.data;
+        if (!msg || (msg.type !== 'PUTER_TTS_REQUEST')) return;
+        const { requestId, payload } = msg;
+
+        const safeReply = (data) => {
+          try { event.source && event.source.postMessage(data, event.origin || '*'); } catch {}
+        };
+
+        // Validate
+        const text = (payload?.text || '').toString();
+        if (!text.trim()) return safeReply({ type: 'PUTER_TTS_ERROR', requestId, error: { code: '400_TEXT_EMPTY', message: 'Text is required' }});
+        if (text.length > MAX_CHARS) return safeReply({ type: 'PUTER_TTS_ERROR', requestId, error: { code: '400_TEXT_TOO_LONG', message: `Max ${MAX_CHARS} characters` }});
+
+        const language = payload?.language || 'en-US';
+        const engine = payload?.engine || 'standard';
+        const voice = payload?.voice || undefined;
+
+        try {
+          const opts = { language, engine }; if (voice) opts.voice = voice;
+          const audio = await puter.ai.txt2speech(text, opts);
+          const blob = await fetch(audio.src).then(r => r.blob());
+          const dataUrl = await blobToDataUrl(blob);
+
+          safeReply({
+            type: 'PUTER_TTS_RESPONSE',
+            requestId,
+            ok: true,
+            payload: {
+              audioDataUrl: dataUrl,
+              size: blob.size,
+              mime: blob.type || 'audio/mpeg',
+              language, engine, voice: voice || null
+            }
+          });
+        } catch (error) {
+          safeReply({ type: 'PUTER_TTS_ERROR', requestId, error: { code: '500_TTS_FAILED', message: error?.message || 'Synthesis failed' }});
+        }
+      });
+    }
+  </script>
+</body>
+</html>
