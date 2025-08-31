@@ -3,9 +3,8 @@ A beautiful, zero-backend text-to-speech web app powered by Puter.js.
 No API keys. No build step. One HTML file. Deploy on Vercel in minutes.
 Includes a lightweight iframe Messaging API so other sites can synthesize speech via postMessage.
 
-Live demo (replace with your URL): [https://your-project.vercel.app/](https://tts-studio-eight.vercel.app/)
-API mode: append #api → Live demo (replace with your URL): [https://your-project.vercel.app/#api](https://tts-studio-eight.vercel.app/)
-
+Live demo: [https://your-project.vercel.app/](https://tts-studio-eight.vercel.app/)
+API mode: append #api 
 ✨ Features
 
 Modern, responsive UI with glassmorphism styling
